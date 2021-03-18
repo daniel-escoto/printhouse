@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Form, Button, Card } from "react-bootstrap";
+import { Form, Button, Card, Alert } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Signup() {
@@ -8,8 +8,9 @@ export default function Signup() {
   const passwordConfirmRef = useRef();
   const { signup } = useAuth();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
     if (passwordRef.current.value !== passwordConfirmRef.current.value) {
@@ -17,13 +18,14 @@ export default function Signup() {
     }
 
     try {
-        setError('')
-        await signup(emailRef.current.value, passwordRef.current.value)
+      setError("");
+      setLoading(true);
+      await signup(emailRef.current.value, passwordRef.current.value);
     } catch {
-        setError('Failed to create an account')
+      setError("Failed to create an account");
     }
 
-    signup(emailRef.current.value, passwordRef.current.value);
+    setLoading(false);
   }
 
   return (
@@ -31,7 +33,8 @@ export default function Signup() {
       <Card>
         <Card.Body>
           <h2 className="text-center mb-4">Sign Up</h2>
-          <Form>
+          {error && <Alert variant="danger">{error}</Alert>}
+          <Form onSubmit={handleSubmit}>
             <Form.Group id="email">
               <Form.Label>Email</Form.Label>
               <Form.Control type="email" ref={emailRef} required></Form.Control>
@@ -52,7 +55,7 @@ export default function Signup() {
                 required
               ></Form.Control>
             </Form.Group>
-            <Button className="w-100" type="submit">
+            <Button disabled={loading} className="w-100" type="submit">
               Sign Up
             </Button>
           </Form>
@@ -63,5 +66,4 @@ export default function Signup() {
       </div>
     </>
   );
-  <div className="w-100 text-center mt-2">Already have an account? Log In</div>;
 }
